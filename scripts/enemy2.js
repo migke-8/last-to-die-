@@ -1,0 +1,105 @@
+import Enemy from "./enemy.js";
+import { player } from "./player.js";
+import { canvas } from './general.js'
+import Particle from './particle.js';
+import TextInfo from "./textInfo.js";
+export class Enemy2 extends Enemy{
+    constructor(x, y, level, dir)
+    {
+        super(x, y, dir);
+        this.hp = level*2;
+        this.attack = level;
+    }
+    update()
+    {
+        if(this.starting)
+        {
+            if(this.x+this.width>canvas.width)
+            {
+                this.x = canvas.width-this.width;
+            }
+            if(this.x<0)
+            {
+                this.x = 0;
+            }
+            this.timer+=this.timerSpeed;
+            if(this.timer>15)
+            {
+                this.canShow = this.canShow?false:true;
+                this.timer = 0;
+                this.timerSpeed+=0.5;
+            }
+            if(this.timerSpeed>9)
+            {
+                this.canShow = true;
+                this.starting = false;
+                this.timer = 0;
+                this.timerSpeed = 1;
+                this.speed = 1
+            }
+        }
+        if(!this.starting)
+        {
+            this.speed+=0.1;
+            let xa = 0;
+            if(this.dir===Enemy.RIGHT_DIR)
+            {
+                xa = this.speed;
+                if(this.x>canvas.width)
+                {
+                    this.particlesDirection = Math.PI;
+                    this.starting = true;
+                    this.hp--;
+                    this.dir = Enemy.LEFT_DIR;
+                }
+            }
+            else
+            {
+                xa=-this.speed;
+                if(this.x<-this.width)
+                {
+                    this.particlesDirection = 0;
+                    this.starting = true;
+                    this.hp--;
+                    this.dir = Enemy.RIGHT_DIR;
+                }
+            }
+            this.move(xa, 0);
+            if(this.isCollidingWithPlayer()&&!player.invincible)
+            {
+                player.takeDamage(this.attack)
+            }
+        }
+        if(this.hp<=0)
+        {
+            this.dead = true;
+        }
+        if(this.dead)
+        {
+            for(let i = 0;i<70;i++)
+            {
+                Particle.addParticle(new Particle(this.x+this.width/2, this.y+this.height/2, Math.random()*(Math.PI*2), 120*Math.random(), 7*Math.random()+3, '#700'));
+            }
+            Enemy.deleteEnemy(this);
+        }
+    }
+    render(ctx)
+    {
+        if(this.canShow)
+        {
+            ctx.fillStyle = '#700';
+            ctx.fillRect(Math.floor(this.x), Math.floor(this.y), this.width, this.height);
+        }
+    }
+    takeDamage(damage)
+    {
+        let mult = 1;
+        if(Math.random()<0.15)
+        {
+            mult = 1.5;
+            TextInfo.addInfo(new TextInfo(this.x, this.y, 'critical', 20, 'red'));
+        }
+        TextInfo.addInfo(new TextInfo(this.x+this.width/2, this.y+this.width/2, damage*mult, 20, 'white'));
+        this.hp-=damage*mult;
+    }
+}

@@ -1,0 +1,27 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+@font-face {
+    font-family: 'game';
+    src: url(res/upheavtt.ttf);
+}
+#screen{
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 35vw;
+    border: 8px solid black;
+    background-color: black;
+    image-rendering: pixelated;
+}
+@media all and (max-width: 1090px){
+    #screen{
+        width: auto;
+        height: 50vh;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+}
