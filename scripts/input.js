@@ -2,7 +2,7 @@ import { player } from "./player.js";
 import { canvas } from "./general.js";
 export let inputs = {
     swipes: [],
-    treshHold: 30,
+    treshHold: 60,
     timer:0,
     taps:0,
     depressed: true,
