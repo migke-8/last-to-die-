@@ -2,7 +2,7 @@ import { player } from "./player.js";
 import { canvas } from "./general.js";
 export let inputs = {
     swipes: [],
-    treshHold: 80,
+    treshHold: 30,
     timer:0,
     taps:0,
     depressed: true,
@@ -130,23 +130,19 @@ document.addEventListener('touchmove', (e)=>{
     if(inputs.swipeDistanceX<-inputs.treshHold&&inputs.swipes.indexOf('swipe right') === -1)
     {
         inputs.swipes.push('swipe right');
-        inputs.swipes.splice(inputs.swipes.indexOf('swipe left'), 1);
     }
     if(inputs.swipeDistanceX>inputs.treshHold&&inputs.swipes.indexOf('swipe left') === -1)
     {
         inputs.swipes.push('swipe left');
-        inputs.swipes.splice(inputs.swipes.indexOf('swipe right'), 1);
     }
     inputs.swipeDistanceY = inputs.touchY-e.changedTouches[0].pageY;
     if(inputs.swipeDistanceY<-inputs.treshHold&&inputs.swipes.indexOf('swipe down') === -1)
     {
         inputs.swipes.push('swipe down');
-        inputs.swipes.splice(inputs.swipes.indexOf('swipe up'), 1);
     }
     if(inputs.swipeDistanceY>inputs.treshHold&&inputs.swipes.indexOf('swipe up') === -1)
     {
         inputs.swipes.push('swipe up');
-        inputs.swipes.splice(inputs.swipes.indexOf('swipe down'), 1);
     }
 });
 document.addEventListener('mousedown', (e)=>{
