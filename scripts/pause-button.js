@@ -2,8 +2,9 @@ import { canvas } from "./general.js";
 import { inputs } from "./input.js";
 import { curState, pause, setCurState } from "./states.js";
 let pauseButton = {
-    x: 0,
-    y: 13,
+    x: 15,
+    y: 15,
+    canPause: true,
     update()
     {
         let scale = canvas.getBoundingClientRect().width/canvas.width;
@@ -11,12 +12,18 @@ let pauseButton = {
         let canvasTouchY = (inputs.touchY-canvas.getBoundingClientRect().y)/scale;
         if(canvasTouchX >= this.x&&canvasTouchX<=this.x+28)
         {
-            if(canvasTouchY >= this.y&&canvasTouchY<=this.y+8)
+            if(canvasTouchY >= this.y&&canvasTouchY<=this.y+8*scale)
             {
-                if(inputs.doubleTaped)
+                if(inputs.taped&&this.canPause)
                 {
+                    this.canPause = false;
                     pause.reset();
+                    pause.canSelect = false;
                     setCurState(pause)
+                }
+                else if(!inputs.taped)
+                {
+                    this.canPause = true;
                 }
             }
         }

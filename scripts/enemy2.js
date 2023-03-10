@@ -9,6 +9,7 @@ export class Enemy2 extends Enemy{
         super(x, y, dir);
         this.hp = level*2;
         this.attack = level;
+        this.level = level;
     }
     update()
     {
@@ -23,7 +24,7 @@ export class Enemy2 extends Enemy{
                 this.x = 0;
             }
             this.timer+=this.timerSpeed;
-            if(this.timer>15)
+            if(this.timer>10)
             {
                 this.canShow = this.canShow?false:true;
                 this.timer = 0;
@@ -78,7 +79,7 @@ export class Enemy2 extends Enemy{
         {
             for(let i = 0;i<70;i++)
             {
-                Particle.addParticle(new Particle(this.x+this.width/2, this.y+this.height/2, Math.random()*(Math.PI*2), 120*Math.random(), 7*Math.random()+3, '#700'));
+                Particle.addParticle(new Particle(this.x+this.width/2, this.y+this.height/2, Math.random()*(Math.PI*2), 120*Math.random(), 7*Math.random()+3, 'red'));
             }
             Enemy.deleteEnemy(this);
         }
@@ -87,8 +88,10 @@ export class Enemy2 extends Enemy{
     {
         if(this.canShow)
         {
-            ctx.fillStyle = '#700';
-            ctx.fillRect(Math.floor(this.x), Math.floor(this.y), this.width, this.height);
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(this.x+this.width/2, this.y+this.height/2, this.width/2, 0, Math.PI*2);
+            ctx.fill();
         }
     }
     takeDamage(damage)

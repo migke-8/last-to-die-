@@ -3,7 +3,8 @@ import { inputs } from "./input.js";
 import Projectile from "./projectile.js";
 import { configuration, curState, menu, over, setCurState } from "./states.js";
 import { shake } from "./main.js";
-import { playerHurtSound, shootSound, wallCollisionSound } from "./sounds.js";
+import { levelUpSound, playerHurtSound, shootSound, wallCollisionSound } from "./sounds.js";
+import TextInfo from "./textInfo.js";
 class Player extends Entity{
 
     xp = 0;
@@ -25,13 +26,17 @@ class Player extends Entity{
     hp = this.maxHp;
     invincibleTimer = 0;
     canShow = true;
+    maxXp = 3;
     constructor(x, y)
     {
         super(new Rectangle(x, y, 16, 16));
     }
     update()
     {
-        let xa = 0, ya = 0;
+        if(this.hp>this.maxHp)
+        {
+            this.hp = this.maxHp;
+        }
         if(this.mana<0)
         {
             this.mana = 0;
@@ -41,7 +46,6 @@ class Player extends Entity{
             this.mana=this.maxMana;
         }
         this.velocity+=this.forcePower*this.forceDir;
-        ya = this.velocity;
         if(inputs.taped&&this.canInvert)
         {
             this.velocity /= 3;
@@ -52,8 +56,7 @@ class Player extends Entity{
         {
             this.canInvert = true;
         }
-        ya = this.velocity;
-        this.move(xa, ya);
+        this.move(0, this.velocity);
         if(this.y<16)
         {
             this.y = 16;
@@ -113,11 +116,14 @@ class Player extends Entity{
             Projectile.addProjectile(p);
             this.mana--;
         }
-        if(this.xp>this.maxXp)
+        if(this.xp>=this.maxXp)
         {
             this.xp%=this.maxXp;
             this.level++;
-
+            this.maxXp*=2;
+            this.levelPoints++;
+            levelUpSound.play();
+            TextInfo.addInfo(new TextInfo(this.x+this.width/2, this.y, 'lvl-up!', 20, 'green'));
         }
         if(this.invincible)
         {

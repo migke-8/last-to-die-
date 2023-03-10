@@ -1,16 +1,18 @@
-export let playerHurtSound = new Audio('../res/player-hurt.wav');
+export let playerHurtSound = document.getElementById('hurt-sound');
 playerHurtSound.volume = 0.6;
-export let pickPotionSound = new Audio('../res/pick-potion.wav');
-pickPotionSound.volume = 0.4;
-export let wallCollisionSound = new Audio('../res/wall-collision.wav')
+export let pickPotionSound = document.getElementById('potion-sound')
+pickPotionSound.volume = 0.3;
+export let wallCollisionSound = document.getElementById('collision-sound');
 wallCollisionSound.volume = 0.6;
-export let loseSound = new Audio('../res/lose.wav')
+export let loseSound = document.getElementById('lose-sound')
 loseSound.volume = 0.6;
-export let explosionSound = new Audio('../res/explosion.wav');
+export let explosionSound = document.getElementById('explosion-sound')
 explosionSound.volume = 0.6;
-export let shootSound = new Audio('../res/shoot.wav');
+export let shootSound = document.getElementById('shoot-sound')
 shootSound.volume = 0.6;
-let sounds = [playerHurtSound, pickPotionSound, wallCollisionSound, loseSound, explosionSound, shootSound];
+export let levelUpSound = document.getElementById('level-up-sound');
+levelUpSound.volume = 0.6;
+let sounds = [playerHurtSound, pickPotionSound, wallCollisionSound, loseSound, explosionSound, shootSound, levelUpSound];
 export function muteSound()
 {
     for(let i = 0;i<sounds.length;i++)

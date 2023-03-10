@@ -24,7 +24,7 @@ class Potion extends Entity{
         {
             player.score++;
             player.mana++;
-            if(Math.random()<0.1)
+            if(Math.random()<0.05)
             {
                 player.hp++;
             }

@@ -145,12 +145,12 @@ document.addEventListener('touchmove', (e)=>{
         inputs.swipes.push('swipe up');
     }
 });
-document.addEventListener('mousedown', (e)=>{
+canvas.addEventListener('mousedown', (e)=>{
     inputs.pressed = true;
     inputs.touchX = e.pageX;
     inputs.touchY = e.pageY;
 });
-document.addEventListener('mouseup', ()=>{
+canvas.addEventListener('mouseup', ()=>{
     inputs.pressed = false;
     inputs.depressed = true;
 });

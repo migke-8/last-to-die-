@@ -8,11 +8,13 @@ let spawnner = {
     maxTimerToSpawn: 240,
     enemiesNum: 1,
     level: 1,
-    timer: 30*65,
-    maxTimer: 30*65,
+    timer: 0,
+    maxTimer: 0,
+    showLevelTimer: 0,
+    textTransparency: 0,
     update()
     {
-        if(player.score>0)
+        if(player.score>0&&!this.showingLevel)
         {
             this.timer--;
             if(this.timer<=0)
@@ -21,8 +23,25 @@ let spawnner = {
                 this.timer = this.maxTimer;
                 this.level++;
                 this.enemiesNum++;
+                this.showingLevel = true;
+                console.log(this.timer)
             }
             this.timerToSpawn++;
+        }
+        if(this.showingLevel)
+        {
+            this.textTransparency+=this.fadingOut?-0.008:0.008;
+            if(this.textTransparency>=1)
+            {
+                this.textTransparency = 1;
+                this.fadingOut = true;
+            }
+            if(this.textTransparency<=0&&this.fadingOut)
+            {
+                this.fadingOut = false;
+                this.showingLevel = false;
+                this.textTransparency = 0;
+            }
         }
         if(this.timerToSpawn>=this.maxTimerToSpawn)
         {
@@ -43,9 +62,9 @@ let spawnner = {
                     dir = Enemy.LEFT_DIR
                 }
                 let enemy = null;
-                if(Math.random()<0.5&&this.level>0)
+                if(Math.random()<0.5&&this.level>3)
                 {
-                    enemy = new Enemy2(x, y, this.level, dir);
+                    enemy = new Enemy2(x, y, this.level-3, dir);
                 }
                 else
                 {
@@ -55,14 +74,22 @@ let spawnner = {
             }
         }
     },
+    render(ctx)
+    {
+        if(this.showingLevel)
+        {
+            ctx.fillStyle = `rgba( 255, 255, 255, ${this.textTransparency})`;
+            ctx.font = '20px game';
+            ctx.fillText('stage: '+this.level, canvas.width/2, 40);
+        }
+    },
     reset()
     {
         this.timerToSpawn = 0;
         this.maxTimerToSpawn = 240;
         this.enemiesNum = 1;
-        this.level = 1;
-        this.maxTimer = 30*65;
-        this.timer = 30*65;
+        this.maxTimer = 15*65;
+        this.timer = this.maxTimer;
         Enemy.clear();
     }
 };

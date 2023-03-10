@@ -22,21 +22,25 @@ class Projectile extends Entity{
         if(this.x<-this.width)
         {
             this.dropParticles();
+            explosionSound.play();
             Projectile.deleteProjectile(this);
         }
         else if(this.x>canvas.width+this.width)
         {
             this.dropParticles();
+            explosionSound.play();
             Projectile.deleteProjectile(this);
         }
         if(this.y<-this.height)
         {
             this.dropParticles();
+            explosionSound.play();
             Projectile.deleteProjectile(this);
         }
         else if(this.y>canvas.height+this.height)
         {
             this.dropParticles();
+            explosionSound.play();
             Projectile.deleteProjectile(this);
         }
         for(let e of Enemy.enemies)
@@ -46,16 +50,22 @@ class Projectile extends Entity{
             if(rect.intersects(rect2))
             {
                 explosionSound.play();
-                e.particlesDirection = this.angle;
                 e.takeDamage(player.attack);
                 this.dropParticles();
-                let xp = 1;
                 if(e instanceof Enemy2)
                 {
-                    xp = e.level;
+                    if(e.hp<=0)
+                    {
+                        player.xp+=e.level;
+                    }
                 }
-                player.xp+=xp;
+                else
+                {
+                    player.xp +=1;
+                }
+                console.log(player.xp)
                 Projectile.deleteProjectile(this);
+                console.log(this)
             }
         }
     }

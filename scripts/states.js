@@ -74,6 +74,7 @@ export const normal = {
                 e.render(ctx);
             }
             potion.render(ctx);
+            spawnner.render(ctx);
             pauseButton.render(ctx);
             UI.render(ctx);
         }
@@ -179,7 +180,14 @@ export const menu = {
         this.curOptionindex = 0;
         this.canUp = true;
         this.canDown = true;
-        this.highScore = 0;
+        if(localStorage.getItem('score'))
+        {
+            menu.highScore = Number(localStorage.getItem('score'));
+        }
+        else
+        {
+            this.highScore = 0;
+        }
         this.showTimer = 0;
     },
     doAction(str)
@@ -364,6 +372,9 @@ export const pause = {
         if(str === 'resume')
         {
             curState = normal;
+            pauseButton.canPause = false;
+            inputs.touchX = 0;
+            inputs.touchY = 0;
         }
         if(str === 'exit')
         {
@@ -373,40 +384,31 @@ export const pause = {
         if(str === 'stats')
         {
             stats.reset();
-            setTransitionTo(stats);
+            curState = stats;
         }
         if(str === 'configurations')
         {
             configuration.reset();
             configuration.lastState = this;
-            setTransitionTo(configuration)
+            curState = configuration;
         }
     }
 };
 export const stats = {
     canExit:false,
-    playerStats: ['attack:', 'max mana:', 'max hp:'],
-    curStatIndex:0,
+    options: ['attack:', 'mana:', 'health points:', 'exit'],
+    curOptionIndex:0,
     canDown: true,
     canUp: true,
     canRight: true,
     canLeft: true,
+    yOffset: 0,
     update()
     {
-        if(inputs.doubleTaped&&this.canExit)
-        {
-            pause.reset();
-            pause.canSelect = false;
-            setTransitionTo(pause);
-        }
-        else if(!inputs.doubleTaped)
-        {
-            this.canExit = true;
-        }
         if(inputs.swipeUp&&this.canUp)
         {
             this.canUp = false;
-            this.curStatIndex++;
+            this.curOptionIndex--;
         }
         else if(!inputs.swipeUp)
         {
@@ -415,36 +417,76 @@ export const stats = {
         if(inputs.swipeDown&&this.canDown)
         {
             this.canDown = false;
-            this.curStatIndex++;
+            this.curOptionIndex++;
         }
         else if(!inputs.swipeDown)
         {
             this.canDown = true;
         }
-        if(this.curStatIndex<0)
+        if(this.curOptionIndex<0)
         {
-            this.curStatIndex = this.playerStats.length-1;
+            this.curOptionIndex = this.options.length-1;
         }
-        if(this.curStatIndex>=this.playerStats.length)
+        if(this.curOptionIndex>=this.options.length)
         {
-            this.curStatIndex = 0;
+            this.curOptionIndex = 0;
         }
-        if(inputs.swipeRight&&this.canRight)
+        if(inputs.taped&&this.curOptionIndex===this.options.length-1)
         {
-            this.canRight = false;
-            this.increaseStat(this.playerStats[this.curStatIndex]);
+            pause.reset();
+            pause.canSelect = false;
+            curState = pause;
         }
-        else if(!inputs.swipeRight)
+        if(inputs.taped&&this.canAdd&&this.curOptionIndex!==this.options.length-1)
         {
-            this.canRight = true;
+            this.canAdd = false;
+            this.increaseStat(this.options[this.curOptionIndex]);
+        }
+        else if(!inputs.taped)
+        {
+            this.canAdd = true;
         }
         else if(!inputs.swipeLeft)
         {
             this.canLeft = true;
         }
+        if(this.curOptionIndex>1&&this.yOffset<40)
+        {
+            this.yOffset = 40;
+        }
+        if(this.curOptionIndex===0&&this.yOffset>0)
+        {
+            this.yOffset = 0;
+        }
     },
     render(ctx)
     {
+        for(let i = 0;i<this.options.length;i++)
+        {
+            let str = this.options[i];
+            ctx.font = '20px game'
+            ctx.fillStyle = 'white';
+            if(this.curOptionIndex === i)
+            {
+                ctx.font = '25px game';
+                ctx.fillStyle = 'yellow';
+            }
+            ctx.fillText(str, canvas.width/2, 50+i*60-this.yOffset);
+            if(str === 'attack:')
+            {
+                ctx.fillText(player.attack, canvas.width/2, 80+i*60-this.yOffset);
+            }
+            if(str === 'mana:')
+            {
+                ctx.fillText(player.mana+'/'+player.maxMana, canvas.width/2, 80+i*60-this.yOffset);
+            }
+            if(str === 'health points:')
+            {
+                ctx.fillText(player.hp+'/'+player.maxHp, canvas.width/2, 80+i*60-this.yOffset);
+            }
+        }
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, 32);
         let mainText = 'stats';
         ctx.fillStyle = 'yellow';
         ctx.textAlign = 'center';
@@ -453,31 +495,8 @@ export const stats = {
         ctx.fillText(mainText, canvas.width/2, 30);
         ctx.fillStyle = 'red';
         ctx.fillText(mainText.substring(6, mainText.length), canvas.width/2, 90);
-
-        for(let i = 0;i<this.playerStats.length;i++)
-        {
-            let str = this.playerStats[i];
-            ctx.font = '20px game'
-            ctx.fillStyle = 'white';
-            if(this.curStatIndex === i)
-            {
-                ctx.font = '25px game';
-                ctx.fillStyle = 'yellow';
-            }
-            ctx.fillText(str, canvas.width/2, 50+i*60);
-            if(str === 'attack:')
-            {
-                ctx.fillText(player.attack+'  +', canvas.width/2, 80+i*60)
-            }
-            if(str === 'max mana:')
-            {
-                ctx.fillText(player.maxMana+'  +', canvas.width/2, 80+i*60)
-            }
-            if(str === 'max hp:')
-            {
-                ctx.fillText(player.maxHp+'  +', canvas.width/2, 80+i*60)
-            }
-        }
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, canvas.height-21, canvas.width, 21);
         ctx.font = '20px game'
         ctx.fillStyle = 'white';
         ctx.fillText('level points: '+player.levelPoints, canvas.width/2, canvas.height-10);
@@ -490,14 +509,18 @@ export const stats = {
             {
                 player.attack++;
             }
-            if(str === 'max mana:')
+            if(str === 'mana:')
             {
                 player.maxMana++;
             }
-            if(str === 'max hp:')
+            if(str === 'health points:')
             {
                 player.maxHp++;
                 player.hp++;
+                if(player.hp>player.maxHp)
+                {
+                    player.hp = play.maxHp;
+                }
             }
             player.levelPoints--;
         }
@@ -505,7 +528,7 @@ export const stats = {
     reset()
     {
         this.canExit = false;
-        this.curStatIndex = 0;
+        this.curOptionIndex = 0;
         this.canDown = true;
         this.canUp = true;
         this.canRight = true;
