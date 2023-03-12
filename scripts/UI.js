@@ -1,5 +1,5 @@
 import { player } from "./player.js";
-import { canvas, randomColors } from "./general.js";
+import { canvas } from "./general.js";
 let UI = {
     scoreMessageAlpha:0,
     fadingOut: false,

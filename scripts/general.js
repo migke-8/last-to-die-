@@ -51,4 +51,31 @@ export const canvas = document.getElementsByTagName('canvas')[0];
 canvas.width = 240;
 canvas.height = 240;
 export const ctx = canvas.getContext('2d');
-export const randomColors = ['white', '#9cc2c8', 'red', 'black','green', 'blue', '#cf7a9d', 'purple'];
+export let binaryCanvas = document.createElement('canvas');
+binaryCanvas.width = canvas.width;
+binaryCanvas.height = canvas.height;
+export let binaryCtx = binaryCanvas.getContext('2d');
+let str = '';
+for(let i = 0;i<40*24;i++)
+{
+    if(Math.random()<0.3)
+    {
+        str+= '1';
+    }
+    else
+    {
+        str+= '0';
+    }
+}
+function drawNumbers(ctx)
+{
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, binaryCanvas.width, binaryCanvas.height);
+    ctx.fillStyle = 'white';
+    ctx.font = '16px game';
+    for(let i = 0;i<24;i++)
+    {
+        ctx.fillText(str.substring(i*40, i*40+40), 0, 10+i*10)
+    }
+}
+drawNumbers(binaryCtx);

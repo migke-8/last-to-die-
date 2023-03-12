@@ -1,14 +1,15 @@
 import { Entity, Rectangle, canvas } from "./general.js";
 import { player } from "./player.js";
 import { pickPotionSound } from "./sounds.js";
+import TextInfo from "./textInfo.js";
 
-class Potion extends Entity{
+class ScoreParticle extends Entity{
     animationIndex = 0;
     sections = [];
     velocity = -6;
     constructor(x, y)
     {
-        super(new Rectangle(x, y, 16, 16));
+        super(new Rectangle(x, y, 8, 8));
         for(let i = 0;i<4;i++)
         {
             let x = i%2;
@@ -33,17 +34,18 @@ class Potion extends Entity{
         if(this.collected)
         {
             pickPotionSound.play();
+            //TextInfo.addInfo(new TextInfo(this.x+this.width/2, this.y+this.height/2, '+1', 20, 'white'))
             this.collected = false;
             this.y = Math.floor(Math.random()*((canvas.height/16)-2))*16+16;
         }
     }
     render(ctx)
     {
-        ctx.fillStyle = 'aquamarine';
+        ctx.fillStyle = '#0F0';
         ctx.fillRect(Math.floor(this.x), Math.floor(this.y), this.width, this.height);
     }
 }
-export let potion = new Potion(canvas.width/2-16/2, 16);
-export function resetPotion(){
-    potion = new Potion(canvas.width/2-16/2, 16);
+export let scoreParticle = new ScoreParticle((canvas.width-8)/2, 16);
+export function resetScoreParticle(){
+    scoreParticle = new ScoreParticle((canvas.width-8)/2, 16);
 }

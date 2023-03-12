@@ -3,8 +3,9 @@ import { player } from "./player.js";
 import { canvas } from './general.js'
 import Particle from './particle.js';
 import TextInfo from "./textInfo.js";
+import { enemyExplosionSound } from "./sounds.js";
 export class Enemy2 extends Enemy{
-    constructor(x, y, level, dir)
+    constructor(x, y, dir, level)
     {
         super(x, y, dir);
         this.hp = level*2;
@@ -24,13 +25,13 @@ export class Enemy2 extends Enemy{
                 this.x = 0;
             }
             this.timer+=this.timerSpeed;
-            if(this.timer>10)
+            if(this.timer>15)
             {
                 this.canShow = this.canShow?false:true;
                 this.timer = 0;
                 this.timerSpeed+=0.5;
             }
-            if(this.timerSpeed>9)
+            if(this.timerSpeed>7)
             {
                 this.canShow = true;
                 this.starting = false;
@@ -48,10 +49,13 @@ export class Enemy2 extends Enemy{
                 xa = this.speed;
                 if(this.x>canvas.width)
                 {
-                    this.particlesDirection = Math.PI;
                     this.starting = true;
                     this.hp--;
                     this.dir = Enemy.LEFT_DIR;
+                    if(this.hp<=0)
+                    {
+                        enemyExplosionSound.play();
+                    }
                 }
             }
             else
@@ -59,10 +63,13 @@ export class Enemy2 extends Enemy{
                 xa=-this.speed;
                 if(this.x<-this.width)
                 {
-                    this.particlesDirection = 0;
                     this.starting = true;
                     this.hp--;
                     this.dir = Enemy.RIGHT_DIR;
+                    if(this.hp<=0)
+                    {
+                        enemyExplosionSound.play();
+                    }
                 }
             }
             this.move(xa, 0);
@@ -77,7 +84,7 @@ export class Enemy2 extends Enemy{
         }
         if(this.dead)
         {
-            for(let i = 0;i<70;i++)
+            for(let i = 0;i<50;i++)
             {
                 Particle.addParticle(new Particle(this.x+this.width/2, this.y+this.height/2, Math.random()*(Math.PI*2), 120*Math.random(), 7*Math.random()+3, 'red'));
             }

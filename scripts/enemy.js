@@ -3,6 +3,7 @@ import { canvas } from "./general.js";
 import { player } from "./player.js";
 import Particle from "./particle.js";
 import TextInfo from "./textInfo.js";
+import { enemyExplosionSound } from "./sounds.js";
 class Enemy extends Entity{
 
     static enemies = [];
@@ -44,7 +45,7 @@ class Enemy extends Entity{
                 xa = this.speed;
                 if(this.x>canvas.width)
                 {
-                    this.particlesDirection = Math.PI;
+                    enemyExplosionSound.play();
                     this.dead = true;
                 }
             }
@@ -53,6 +54,7 @@ class Enemy extends Entity{
                 xa=-this.speed;
                 if(this.x<-this.width)
                 {
+                    enemyExplosionSound.play();
                     this.dead = true;
                 }
             }
@@ -64,7 +66,7 @@ class Enemy extends Entity{
         }
         if(this.dead)
         {
-            for(let i = 0;i<70;i++)
+            for(let i = 0;i<50;i++)
             {
                 Particle.addParticle(new Particle(this.x+this.width/2, this.y+this.height/2, Math.random()*(Math.PI*2), 120*Math.random(), 7*Math.random()+3, 'red'));
             }

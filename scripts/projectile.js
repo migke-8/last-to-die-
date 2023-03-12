@@ -1,5 +1,5 @@
 import Enemy from "./enemy.js";
-import { Entity, Rectangle } from "./general.js";
+import { binaryCtx, Entity, Rectangle } from "./general.js";
 import { canvas } from "./general.js";
 import Particle from "./particle.js";
 import { player } from "./player.js";
@@ -63,23 +63,54 @@ class Projectile extends Entity{
                 {
                     player.xp +=1;
                 }
-                console.log(player.xp)
                 Projectile.deleteProjectile(this);
-                console.log(this)
             }
-        }
-    }
-    dropParticles()
-    {
-        for(let i = 0;i<50;i++)
-        {
-            Particle.addParticle(new Particle(this.x+this.width/2, this.y+this.height/2, Math.random()*(Math.PI*2), 120*Math.random(), 7*Math.random()+3, 'orange'));
         }
     }
     render(ctx)
     {
-        ctx.fillStyle = 'orange';
-        ctx.fillRect(Math.floor(this.x), Math.floor(this.y), this.width, this.height)
+        // ctx.fillStyle = 'rgb(57, 57, 57)';
+        // ctx.beginPath();
+        // ctx.arc(this.x+this.width/2, this.y+this.height/2, this.width/2, 0, Math.PI*2)
+        // ctx.fill();
+        // let data = ctx.getImageData(this.x, this.y, this.width, this.height);
+        // let pixels = data.data;
+        // let data2 = binaryCtx.getImageData(this.x, this.y, this.width, this.height);
+        // let pixels2 = data2.data;
+        // for(let i = 0;i<pixels.length;i+=4)
+        // {
+        //     let red = pixels[i];
+        //     let green = pixels[i+1];
+        //     let blue = pixels[i+2];
+        //     if(red === 57&&green === 57&& blue === 57)
+        //     {
+        //         if(pixels2[i] === 255&&pixels2[i+1] === 255&&pixels2[i+2] ===255)
+        //         {
+        //             pixels[i] = 0;
+        //             pixels[i+1] = 255;
+        //             pixels[i+2] = 0;
+        //         }
+        //         else
+        //         {
+        //             pixels[i] = 0;
+        //             pixels[i+1] = 0;
+        //             pixels[i+2] = 0;
+        //         }
+        //     }
+        // }
+        // ctx.putImageData(data, this.x, this.y);
+        ctx.fillStyle = '#0F0';
+        // ctx.fillRect(Math.floor(this.x), Math.floor(this.y), this.width, this.height);
+        ctx.beginPath();
+        ctx.arc(Math.floor(this.x+8), Math.floor(this.y+8), 8, 0, Math.PI*2);
+        ctx.fill();
+    }
+    dropParticles()
+    {
+        for(let i = 0;i<30;i++)
+        {
+            Particle.addParticle(new Particle(this.x+this.width, this.y+this.height, Math.random()*(Math.PI*2), 120*Math.random(), 7*Math.random()+3, '#0F0'));
+        }
     }
     static addProjectile(proj){
         Projectile.projectiles.push(proj);

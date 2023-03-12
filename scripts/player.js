@@ -46,7 +46,7 @@ class Player extends Entity{
             this.mana=this.maxMana;
         }
         this.velocity+=this.forcePower*this.forceDir;
-        if(inputs.taped&&this.canInvert)
+        if(inputs.doubleTaped&&this.canInvert)
         {
             this.velocity /= 3;
             this.forceDir*=-1;
@@ -80,6 +80,7 @@ class Player extends Entity{
         this.shootTimer++;
         if(inputs.swipeRight&&this.shootTimer>=this.maxShootTimer&&this.mana>0)
         {
+            this.velocity = 0;
             this.shootTimer = 0;
             shootSound.play();
             let p = new Projectile(0, 0, 0);
@@ -90,6 +91,7 @@ class Player extends Entity{
         }
         if(inputs.swipeLeft&&this.shootTimer>=this.maxShootTimer&&this.mana>0)
         {
+            this.velocity = 0;
             this.shootTimer = 0;
             let p = new Projectile(0, 0, 180*Math.PI/180);
             p.x = this.x+(this.width-p.width)/2;
@@ -100,6 +102,7 @@ class Player extends Entity{
 
         if(inputs.swipeUp&&this.shootTimer>=this.maxShootTimer&&this.mana>0)
         {
+            this.velocity = 0;
             this.shootTimer = 0;
             let p = new Projectile(0, 0, 270*Math.PI/180);
             p.x = this.x+(this.width-p.width)/2;
@@ -109,6 +112,7 @@ class Player extends Entity{
         }
         if(inputs.swipeDown&&this.shootTimer>=this.maxShootTimer&&this.mana>0)
         {
+            this.velocity = 0;
             this.shootTimer = 0;
             let p = new Projectile(0, 0, 90*Math.PI/180);
             p.x = this.x+(this.width-p.width)/2;
@@ -123,7 +127,7 @@ class Player extends Entity{
             this.maxXp*=2;
             this.levelPoints++;
             levelUpSound.play();
-            TextInfo.addInfo(new TextInfo(this.x+this.width/2, this.y, 'lvl-up!', 20, 'green'));
+            TextInfo.addInfo(new TextInfo(this.x+this.width/2, this.y, 'lvl-up!', 20, '#0F0'));
         }
         if(this.invincible)
         {

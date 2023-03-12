@@ -1,22 +1,25 @@
 import UI from "./UI.js";
-import { canvas } from "./general.js";
+import { canvas, Rectangle } from "./general.js";
 import { player, resetPlayer } from "./player.js";
-import { resetPotion, potion } from "./potion.js";
+import { resetScoreParticle, scoreParticle } from "./score-particle.js";
 import spawnner from "./spawner.js";
 import Enemy from "./enemy.js";
 import { inputs } from "./input.js";
 import Projectile from "./projectile.js";
 import Particle from "./particle.js";
-import { setTransitionTo } from "./main.js";
+import { grayScale, setGrayScale, setTransitionTo } from "./main.js";
 import TextInfo from "./textInfo.js";
-import { loseSound, muteSound, unmuteSound } from "./sounds.js";
+import { loseSound, mainMusic, menuMusic, muteMusic, muteSound, unmuteSound } from "./sounds.js";
 import pauseButton from "./pause-button.js";
 export const normal = {
     justStarted: true,
     timer:0,
     update(){
+        menuMusic.pause()
+        menuMusic.currentTime = 0;
         if(!this.justStarted)
         {
+            mainMusic.play();
             pauseButton.update();
             spawnner.update();
             player.update();
@@ -36,7 +39,7 @@ export const normal = {
             {
                 e.update();
             }
-            potion.update();
+            scoreParticle.update();
             if(player.score>menu.highScore&UI.canShowScoreMessage)
             {
                 UI.newHighScore = true;
@@ -73,7 +76,7 @@ export const normal = {
             {
                 e.render(ctx);
             }
-            potion.render(ctx);
+            scoreParticle.render(ctx);
             spawnner.render(ctx);
             pauseButton.render(ctx);
             UI.render(ctx);
@@ -91,7 +94,7 @@ export const normal = {
     {
         this.justStarted = true;
         this.timer = 0;
-        resetPotion();
+        resetScoreParticle();
         resetPlayer();
         spawnner.reset();
         UI.reset();
@@ -101,48 +104,44 @@ export const normal = {
     }
 };
 export const menu = {
-    options: ['start', 'configurations', 'exit'],
+    options: ['start', 'configurations'],
+    rectangles: [new Rectangle(84, 137, 72, 13), new Rectangle(17, 167, 206, 13)],
     curOptionindex:0,
-    canUp: true,
-    canDown: true,
     highScore: 0,
+    selectedIndex: 0,
     canSelect: true,
     update()
     {
-        if(inputs.swipeUp&&this.canUp)
+        menuMusic.play();
+        mainMusic.pause();
+        mainMusic.currentTime = 0;
+        let scale = canvas.getBoundingClientRect().width/canvas.width;
+        let canvasTouchX = (inputs.touchX-canvas.getBoundingClientRect().x)/scale;
+        let canvasTouchY = (inputs.touchY-canvas.getBoundingClientRect().y)/scale;
+        for(let i = 0;i<this.rectangles.length;i++)
         {
-            this.canUp = false;
-            this.curOptionindex--;
-        }
-        else if(!inputs.swipeUp)
-        {
-            this.canUp = true;
-        }
-        if(inputs.swipeDown&&this.canDown)
-        {
-            this.canDown = false;
-            this.curOptionindex++;
-        }
-        else if(!inputs.swipeDown)
-        {
-            this.canDown = true;
-        }
-        if(this.curOptionindex<0)
-        {
-            this.curOptionindex = this.options.length-1;
-        }
-        else if(this.curOptionindex>=this.options.length)
-        {
-            this.curOptionindex = 0;
-        }
-        if(inputs.taped&&this.canSelect)
-        {
-            this.canSelect = false;
-            this.doAction(this.options[this.curOptionindex]);
-        }
-        else if(!inputs.taped)
-        {
-            this.canSelect = true;
+            if(canvasTouchX>=this.rectangles[i].x&&canvasTouchX<=this.rectangles[i].x+this.rectangles[i].width)
+            {
+                if(canvasTouchY>=this.rectangles[i].y&&canvasTouchY<=this.rectangles[i].y+this.rectangles[i].height)
+                {
+                    if(inputs.taped&&this.canSelect)
+                    {
+                        this.canSelect = false;
+                        if(this.selectedIndex !== i)
+                        {
+                            this.selectedIndex = i;
+                        }
+                        else
+                        {
+                            this.doAction(this.options[i]);
+                        }
+                    }
+                    else if(!inputs.taped)
+                    {
+                        this.canSelect = true;
+                    }
+                }
+            }
         }
     },
     render(ctx)
@@ -152,19 +151,23 @@ export const menu = {
         ctx.textAlign = 'center';
         ctx.font = '50px game'
         ctx.fillStyle = 'white';
-        ctx.fillText(mainText.substring(0, 4), canvas.width/2, 30);
-        ctx.fillText(mainText.substring(4, 6), canvas.width/2, 60);
+        ctx.fillText(mainText.substring(0, 4), canvas.width/2, 30+Math.cos(Date.now()/150)*3);
+        ctx.fillText(mainText.substring(4, 6), canvas.width/2, 60+Math.cos(Date.now()/150)*3);
         ctx.fillStyle = 'red';
-        ctx.fillText(mainText.substring(6, mainText.length), canvas.width/2, 90);
-
+        ctx.fillText(mainText.substring(6, mainText.length), canvas.width/2, 90+Math.cos(Date.now()/150)*3);
+        // for(let r of this.rectangles)
+        // {
+        //     ctx.fillStyle = 'red';
+        //     ctx.fillRect(r.x, r.y, r.width, r.height);
+        // }
         for(let i = 0;i<this.options.length;i++)
         {
             let str = this.options[i];
             ctx.font = '20px game'
             ctx.fillStyle = 'white';
-            if(this.curOptionindex === i)
+            if(this.selectedIndex === i)
             {
-                ctx.font = '25px game';
+                ctx.font = '25px game'
                 ctx.fillStyle = 'yellow';
             }
             ctx.fillText(str, canvas.width/2, 150+i*30);
@@ -204,10 +207,6 @@ export const menu = {
             configuration.lastState = this;
             curState = configuration;
         }
-        if(str === 'exit')
-        {
-            window.close();
-        }
     }
 };
 export const over = {
@@ -222,6 +221,10 @@ export const over = {
     canPlaySound: true,
     update()
     {
+        menuMusic.pause();
+        menuMusic.currentTime = 0;
+        mainMusic.pause();
+        mainMusic.currentTime = 0;
         if(this.animating)
         {
             this.textVelocity+=0.8;
@@ -306,43 +309,41 @@ export const over = {
 export const pause = {
     curOptionindex: 0,
     options: ['resume', 'stats', 'configurations', 'exit'],
+    rectangles: [new Rectangle(74, 67, 91, 13),new Rectangle(84, 97, 72, 13), new Rectangle(17, 127,206, 13), new Rectangle(91, 157, 57, 13)],
     canSelect: true,
+    selectedIndex: 0,
     update()
     {
-        if(inputs.swipeUp&&this.canUp)
+        menuMusic.pause();
+        menuMusic.currentTime = 0;
+        mainMusic.pause();
+        let scale = canvas.getBoundingClientRect().width/canvas.width;
+        let canvasTouchX = (inputs.touchX-canvas.getBoundingClientRect().x)/scale;
+        let canvasTouchY = (inputs.touchY-canvas.getBoundingClientRect().y)/scale;
+        for(let i = 0;i<this.rectangles.length;i++)
         {
-            this.canUp = false;
-            this.curOptionindex--;
-        }
-        else if(!inputs.swipeUp)
-        {
-            this.canUp = true;
-        }
-        if(inputs.swipeDown&&this.canDown)
-        {
-            this.canDown = false;
-            this.curOptionindex++;
-        }
-        else if(!inputs.swipeDown)
-        {
-            this.canDown = true;
-        }
-        if(this.curOptionindex<0)
-        {
-            this.curOptionindex = this.options.length-1;
-        }
-        else if(this.curOptionindex>=this.options.length)
-        {
-            this.curOptionindex = 0;
-        }
-        if(inputs.taped&&this.canSelect)
-        {
-            this.canSelect = false;
-            this.doAction(this.options[this.curOptionindex]);
-        }
-        else if(!inputs.taped)
-        {
-            this.canSelect = true;
+            if(canvasTouchX>=this.rectangles[i].x&&canvasTouchX<=this.rectangles[i].x+this.rectangles[i].width)
+            {
+                if(canvasTouchY>=this.rectangles[i].y&&canvasTouchY<=this.rectangles[i].y+this.rectangles[i].height)
+                {
+                    if(inputs.taped&&this.canSelect)
+                    {
+                        this.canSelect = false;
+                        if(this.selectedIndex !== i)
+                        {
+                            this.selectedIndex = i;
+                        }
+                        else
+                        {
+                            this.doAction(this.options[i]);
+                        }
+                    }
+                    else if(!inputs.taped)
+                    {
+                        this.canSelect = true;
+                    }
+                }
+            }
         }
     },
     render(ctx)
@@ -351,11 +352,16 @@ export const pause = {
         ctx.font = '40px game';
         ctx.textAlign = 'center';
         ctx.fillText('paused', canvas.width/2, 30);
+        // for(let r of this.rectangles)
+        // {
+        //     ctx.fillStyle = 'red';
+        //     ctx.fillRect(r.x, r.y, r.width, r.height);
+        // }
         for(let i = 0;i<this.options.length;i++)
         {
             ctx.fillStyle = 'white';
             ctx.font = '20px game';
-            if(this.curOptionindex === i)
+            if(this.selectedIndex=== i)
             {
                 ctx.fillStyle = 'yellow';
                 ctx.font = '25px game';
@@ -397,76 +403,76 @@ export const pause = {
 export const stats = {
     canExit:false,
     options: ['attack:', 'mana:', 'health points:', 'exit'],
-    curOptionIndex:0,
-    canDown: true,
-    canUp: true,
-    canRight: true,
-    canLeft: true,
+    rectangles: [new Rectangle(73, 37, 93, 13), new Rectangle(87, 97, 66, 13), new Rectangle(25, 157, 190, 13), new Rectangle(91, 217, 57, 13)],
+    selectedIndex: 0,
     yOffset: 0,
     update()
     {
-        if(inputs.swipeUp&&this.canUp)
+        let scale = canvas.getBoundingClientRect().width/canvas.width;
+        let canvasTouchX = (inputs.touchX-canvas.getBoundingClientRect().x)/scale;
+        let canvasTouchY = (inputs.touchY-canvas.getBoundingClientRect().y)/scale;
+        for(let i = 0;i<this.rectangles.length;i++)
         {
-            this.canUp = false;
-            this.curOptionIndex--;
-        }
-        else if(!inputs.swipeUp)
-        {
-            this.canUp = true;
-        }
-        if(inputs.swipeDown&&this.canDown)
-        {
-            this.canDown = false;
-            this.curOptionIndex++;
-        }
-        else if(!inputs.swipeDown)
-        {
-            this.canDown = true;
-        }
-        if(this.curOptionIndex<0)
-        {
-            this.curOptionIndex = this.options.length-1;
-        }
-        if(this.curOptionIndex>=this.options.length)
-        {
-            this.curOptionIndex = 0;
-        }
-        if(inputs.taped&&this.curOptionIndex===this.options.length-1)
-        {
-            pause.reset();
-            pause.canSelect = false;
-            curState = pause;
-        }
-        if(inputs.taped&&this.canAdd&&this.curOptionIndex!==this.options.length-1)
-        {
-            this.canAdd = false;
-            this.increaseStat(this.options[this.curOptionIndex]);
-        }
-        else if(!inputs.taped)
-        {
-            this.canAdd = true;
-        }
-        else if(!inputs.swipeLeft)
-        {
-            this.canLeft = true;
-        }
-        if(this.curOptionIndex>1&&this.yOffset<40)
-        {
-            this.yOffset = 40;
-        }
-        if(this.curOptionIndex===0&&this.yOffset>0)
-        {
-            this.yOffset = 0;
+            if(canvasTouchX>=this.rectangles[i].x&&canvasTouchX<=this.rectangles[i].x+this.rectangles[i].width)
+            {
+                if(canvasTouchY+this.yOffset>=this.rectangles[i].y&&canvasTouchY+this.yOffset<=this.rectangles[i].y+this.rectangles[i].height)
+                {
+                    if(inputs.taped&&this.canSelect)
+                    {
+                        this.canSelect = false;
+                        if(this.selectedIndex !== i)
+                        {
+                            this.selectedIndex = i;
+                        }
+                        else
+                        {
+                            if(i<this.options.length-1)
+                            {
+                                this.increaseStat(this.options[i]);
+                            }
+                            else
+                            {
+                                curState = pause;
+                            }
+                        }
+                    }
+                    else if(!inputs.taped)
+                    {
+                        this.canSelect = true;
+                    }
+                }
+            }
+            if(inputs.swipeUp)
+            {
+                this.yOffset--;
+            }
+            if(inputs.swipeDown)
+            {
+                this.yOffset++;
+            }
+            if(this.yOffset<0)
+            {
+                this.yOffset = 0;
+            }
+            else if(this.yOffset>30)
+            {
+                this.yOffset = 30;
+            }
         }
     },
     render(ctx)
     {
+        // for(let r of this.rectangles)
+        // {
+        //     ctx.fillStyle = 'red';
+        //     ctx.fillRect(r.x, r.y-this.yOffset, r.width, r.height);
+        // }
         for(let i = 0;i<this.options.length;i++)
         {
             let str = this.options[i];
             ctx.font = '20px game'
             ctx.fillStyle = 'white';
-            if(this.curOptionIndex === i)
+            if(this.selectedIndex === i)
             {
                 ctx.font = '25px game';
                 ctx.fillStyle = 'yellow';
@@ -536,48 +542,46 @@ export const stats = {
     }
 }
 export const configuration = {
-    curOptionindex: 0,
-    options: ['mute sound', 'mute music', 'exit'],
+    selectedIndex: 0,
+    options: ['mute sound', 'mute music', 'gray scale', 'exit'],
+    rectangles: [new Rectangle(48, 67, 144 , 13), new Rectangle(47, 117, 145 , 13), new Rectangle(48, 167, 144 , 13), new Rectangle(91, 217, 57 , 13)],
     canExit: false,
     lastState: null,
     soundMuted: false,
     musicMuted: false,
     update()
     {
-        if(inputs.swipeDown&&this.canDown)
+        mainMusic.pause();
+        mainMusic.currentTime = 0;
+        menuMusic.pause();
+        menu.currentTime = 0;
+        let scale = canvas.getBoundingClientRect().width/canvas.width;
+        let canvasTouchX = (inputs.touchX-canvas.getBoundingClientRect().x)/scale;
+        let canvasTouchY = (inputs.touchY-canvas.getBoundingClientRect().y)/scale;
+        for(let i = 0;i<this.rectangles.length;i++)
         {
-            this.canDown = false;
-            this.curOptionindex++;
-        }
-        else if(!inputs.swipeDown)
-        {
-            this.canDown = true;
-        }
-        if(inputs.swipeUp&&this.canUp)
-        {
-            this.canUp = false;
-            this.curOptionindex--;
-        }
-        else if(!inputs.swipeUp)
-        {
-            this.canUp = true;
-        }
-        if(this.curOptionindex<0)
-        {
-            this.curOptionindex = 0;
-        }
-        if(this.curOptionindex>=this.options.length)
-        {
-            this.curOptionindex = this.options.length-1;
-        }
-        if(inputs.taped&&this.canChangeValue)
-        {
-            this.canChangeValue = false;
-            this.doAction(this.options[this.curOptionindex]);
-        }
-        else if(!inputs.taped)
-        {
-            this.canChangeValue = true;
+            if(canvasTouchX>=this.rectangles[i].x&&canvasTouchX<=this.rectangles[i].x+this.rectangles[i].width)
+            {
+                if(canvasTouchY>=this.rectangles[i].y&&canvasTouchY<=this.rectangles[i].y+this.rectangles[i].height)
+                {
+                    if(inputs.taped&&this.canSelect)
+                    {
+                        this.canSelect = false;
+                        if(this.selectedIndex !== i)
+                        {
+                            this.selectedIndex = i;
+                        }
+                        else
+                        {
+                            this.doAction(this.options[i]);
+                        }
+                    }
+                    else if(!inputs.taped)
+                    {
+                        this.canSelect = true;
+                    }
+                }
+            }
         }
     },
     render(ctx)
@@ -586,23 +590,32 @@ export const configuration = {
         ctx.textAlign = 'center';
         ctx.font = '25px game';
         ctx.fillText('configurations', canvas.width/2, 30);
+        // for(let r of this.rectangles)
+        // {
+        //     ctx.fillStyle = 'red';
+        //     ctx.fillRect(r.x, r.y, r.width, r.height);
+        // }
         for(let i = 0;i<this.options.length;i++)
         {
             ctx.fillStyle = 'white';
             ctx.font = '20px game';
-            if(this.curOptionindex===i)
+            if(this.selectedIndex===i)
             {
                 ctx.fillStyle = 'yellow';
                 ctx.font = '25px game';
             }
-            ctx.fillText(this.options[i], canvas.width/2, 80+i*40);
+            ctx.fillText(this.options[i], canvas.width/2, 80+i*50);
             if(this.options[i] === 'mute sound')
             {
-                ctx.fillText(this.soundMuted, canvas.width/2, 100+i*40);
+                ctx.fillText(this.soundMuted, canvas.width/2, 100+i*50);
             }
             if(this.options[i] === 'mute music')
             {
-                ctx.fillText(this.musicMuted, canvas.width/2, 100+i*40);
+                ctx.fillText(this.musicMuted, canvas.width/2, 100+i*50);
+            }
+            if(this.options[i] === 'gray scale')
+            {
+                ctx.fillText(grayScale, canvas.width/2, 100+i*50);
             }
         }
     },
@@ -631,6 +644,18 @@ export const configuration = {
         if(str === 'mute music')
         {
             this.musicMuted = this.musicMuted?false:true;
+            if(this.musicMuted)
+            {
+                muteMusic();
+            }
+            else
+            {
+                unmuteSound();
+            }
+        }
+        if(str === 'gray scale')
+        {
+            setGrayScale(grayScale?false:true);
         }
         if(str === 'exit')
         {

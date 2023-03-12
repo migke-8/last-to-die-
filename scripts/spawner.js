@@ -2,16 +2,17 @@ import Enemy from "./enemy.js";
 import { Enemy2 } from "./enemy2.js";
 import { canvas } from "./general.js";
 import { player } from "./player.js";
-
+import { Enemy3 } from "./Enemy3.js";
 let spawnner = {
     timerToSpawn: 0,
-    maxTimerToSpawn: 240,
-    enemiesNum: 1,
-    level: 1,
+    maxTimerToSpawn: 0,
+    enemiesNum: 0,
+    level: 0,
     timer: 0,
     maxTimer: 0,
     showLevelTimer: 0,
     textTransparency: 0,
+    counter: 0,
     update()
     {
         if(player.score>0&&!this.showingLevel)
@@ -22,11 +23,15 @@ let spawnner = {
                 this.maxTimer*=1.5;
                 this.timer = this.maxTimer;
                 this.level++;
-                this.enemiesNum++;
+                this.counter++;
                 this.showingLevel = true;
-                console.log(this.timer)
             }
             this.timerToSpawn++;
+        }
+        if(this.counter>2)
+        {
+            this.counter = 0;
+            this.enemiesNum++;
         }
         if(this.showingLevel)
         {
@@ -53,18 +58,22 @@ let spawnner = {
                 let dir = 0;
                 if(Math.random()<0.5)
                 {
-                    x = 0;
+                    x = 1;
                     dir = Enemy.RIGHT_DIR;
                 }
                 else
                 {
-                    x = canvas.width-16;
+                    x = canvas.width-25;
                     dir = Enemy.LEFT_DIR
                 }
                 let enemy = null;
-                if(Math.random()<0.5&&this.level>3)
+                if(Math.random()<0.5&&this.level>=6)
                 {
-                    enemy = new Enemy2(x, y, this.level-3, dir);
+                    enemy = new Enemy3(x, y, dir, this.level-5);
+                }
+                else if(Math.random()<0.5&&this.level>=3)
+                {
+                    enemy = new Enemy2(x, y, dir, this.level-2);
                 }
                 else
                 {
@@ -86,8 +95,9 @@ let spawnner = {
     reset()
     {
         this.timerToSpawn = 0;
+        this.level = 1;
         this.maxTimerToSpawn = 240;
-        this.enemiesNum = 1;
+        this.enemiesNum = 2;
         this.maxTimer = 15*65;
         this.timer = this.maxTimer;
         Enemy.clear();

@@ -154,3 +154,10 @@ canvas.addEventListener('mouseup', ()=>{
     inputs.pressed = false;
     inputs.depressed = true;
 });
+// canvas.addEventListener('mousemove', (e)=>{
+//     inputs.touchX = e.pageX;
+//     inputs.touchY = e.pageY;
+//     let scale = canvas.getBoundingClientRect().width/canvas.width;
+//     console.log((inputs.touchX-canvas.getBoundingClientRect().x)/scale);
+//     console.log((inputs.touchY-canvas.getBoundingClientRect().y)/scale);
+// })
