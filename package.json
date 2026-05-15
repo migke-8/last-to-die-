@@ -1,0 +1,9 @@
+{
+  "name": "last-to-die-",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "dev-dependencies": {
+    "serve": "^14.2.6"
+  }
+}
