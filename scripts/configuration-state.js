@@ -1,6 +1,6 @@
 import { Rectangle } from "./general.js";
 import { inputs } from "./input.js";
-import { mainMusic, menuMusic } from "./sounds.js";
+import { mainMusic, menuMusic, muteMusic, muteSound, unmuteSound } from "./sounds.js";
 
 export class ConfigurationState {
   selectedIndex = 0;

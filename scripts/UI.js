@@ -6,10 +6,10 @@ class UI {
   constructor(scene) {
     this.scene = scene;
   }
-  update() {
+  update(dt) {
     if (this.newHighScore) {
       this.colorIndex++;
-      this.scoreMessageAlpha += this.fadingOut ? -0.01 : 0.05;
+      this.scoreMessageAlpha += this.fadingOut ? -0.01 : 0.05 * dt;
       if (this.scoreMessageAlpha >= 1) {
         this.scoreMessageAlpha = 1;
         this.fadingOut = true;

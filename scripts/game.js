@@ -20,15 +20,28 @@ export class Game {
     this.scenes.set("pause", this.createState("pause"));
     this.scenes.set("configuration", this.createState("configuration"));
     this.scenes.set("stats", this.createState("stats"));
-  }
-  start() {
-    this.then = performance.now();
-    this.accumulator = 0;
-    requestAnimationFrame(this._loop);
-    this.canvas.classList.remove("hidden");
-    document.querySelector("button").classList.add("hidden");
     this.scenes.set("menu", this.createState("menu"));
     this.curState = this.scenes.get("menu");
+  }
+  start() {
+    if (this.isRunning) return;
+    this.isRunning = true;
+    this.then = performance.now();
+    this.accumulator = 0;
+    this.frameId = requestAnimationFrame(this._loop);
+    window.onblur = () => {
+      this.stop();
+    };
+    window.onclick = () => {
+      this.start();
+    };
+    this.canvas.classList.remove("hidden");
+    document.querySelector("button").classList.add("hidden");
+  }
+  stop() {
+    if (!this.isRunning) return;
+    this.isRunning = false;
+    cancelAnimationFrame(this.frameId);
   }
   _init() {
     if (localStorage.getItem("score")) {
@@ -87,6 +100,7 @@ export class Game {
     }
   }
   _loop = (now) => {
+    if (!this.isRunning) return;
     let difference = now - this.then;
     this.accumulator += difference;
     while (this.accumulator > 1000 / fps) {
@@ -96,7 +110,7 @@ export class Game {
       this._render();
       this.accumulator -= 1000 / fps;
     }
-    requestAnimationFrame(this._loop);
+    this.frameId = requestAnimationFrame(this._loop);
   };
   _preShake() {
     let xa = Math.random() * this.shakePower - this.shakePower / 2,

@@ -16,6 +16,7 @@ let sounds = [
   explosionSound,
   shootSound,
   levelUpSound,
+  enemyExplosionSound
 ];
 export function muteSound() {
   for (let i = 0; i < sounds.length; i++) {
